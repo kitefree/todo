@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="Description" content="Enter your description here"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+<title>Todo</title>
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+
+<div id="app" class="container my-3">
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text">待辦事項</span>
+      </div>
+      <input type="text" class="form-control" placeholder="準備要做的任務" id="newTodo">
+      <div class="input-group-append">
+        <button class="btn btn-primary" type="button" id="addTodo" >新增</button>
+      </div>
+    </div>
+    <div class="card text-center">
+      <ul class="list-group list-group-flush text-left" id="todoList">
+
+      </ul>
+      <div class="card-footer d-flex justify-content-between">
+        <span>還有 <span id="taskCount">0</span> 筆任務</span>
+        <a href="#" id="clearTask">清除所有任務</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+    const inpTodo = document.querySelector("#newTodo");
+    const btnAddTodo = document.querySelector("#addTodo");
+    const clearTask = document.querySelector("#clearTask");
+    const taskCount = document.querySelector("#taskCount");
+    let todoList = document.querySelector("#todoList");
+    
+    //關注點分離：資料先定義出來
+    var data = [];
+
+    btnAddTodo.addEventListener('click',insertTodoData);
+    clearTask.addEventListener('click',deleteAllTodoData);
+
+    //新增任務
+    function insertTodoData()
+    {
+        //關注點分離：資料處理
+        data.push({"text":inpTodo.value,"finished":false});
+
+        //關注點分離：畫面繪製
+        render();
+    }
+
+    //刪除任務
+    function deleteTodoData(e)
+    {   
+        //關注點分離：資料處理
+        var id = e.target.dataset.id;
+        data.splice(id,1);
+        
+        //關注點分離：畫面繪製
+        render();
+    }
+
+    //刪除所有任務
+    function deleteAllTodoData()
+    {
+        //關注點分離：資料處理
+        data = [];
+
+        //關注點分離：畫面繪製
+        render();
+    }
+
+    //完成任務
+    function finishTodoData(e)
+    {       
+        //關注點分離：資料處理 
+        //var id = e.target.parentElement.getElementsByClassName("removeTodos")[0].dataset.id;
+        var id = e.target.dataset.id;
+        var status = e.target.checked;
+        
+        data.forEach(function(item,i){            
+            if(i == id) item.finished = status;           
+        });
+        
+        //關注點分離：畫面繪製
+        render();        
+    }
+
+    //更新頁面
+    function render()
+    {
+        var tmpHTML = '';
+
+        //由資料內容更新頁面
+        data.forEach(function(item,i){
+            var finishedStyle = "";
+            var finishedChecked = "";
+            if(item.finished)
+            {      
+                var finishedStyle = "text-decoration:line-through";
+                var finishedChecked = "checked";          
+            }
+
+            tmpHTML = tmpHTML +`<li class="list-group-item" style="${ finishedStyle }"><input type="checkbox" class="chks" data-id="${ i }" ${ finishedChecked } > ${ item.text } <i class="fa fa-times removeTodos" data-id="${ i }"  style="float:right;cursor:pointer"></i></li>`
+        });
+        
+        todoList.innerHTML = tmpHTML;
+
+        taskCount.innerHTML = (function(){
+            var count = 0;            
+            data.forEach(function(item){
+                if(item.finished==false)
+                {
+                    ++count;
+                }
+            });
+            return count;
+        }
+        )();
+
+        inpTodo.value = '';
+
+
+        //event 註冊
+        let removeTodos = document.querySelectorAll(".removeTodos");
+        let chks = document.querySelectorAll(".chks");
+        
+        removeTodos.forEach(function(removeTodo){
+            removeTodo.addEventListener('click',deleteTodoData);
+        });
+
+        chks.forEach(function(chk){
+            chk.addEventListener('click',finishTodoData);
+        })
+
+
+
+    }
+
+
+</script>
+</body>
+</html>
